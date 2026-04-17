@@ -1,8 +1,10 @@
 # CiteSight 🔍
-### Generative Information Retrieval for Science
+### Generative Information Retrieval for Science - Web App & API
 
 > A SaaS platform for citation-accurate scientific search, built on Retrieval-Augmented Generation (RAG).
 > Every factual claim in CiteSight's answers is directly traceable to a real retrieved paper — hallucinated citations are architecturally impossible.
+> 
+> **Now featuring a beautiful web interface** for intuitive research exploration alongside a powerful REST API for developers.
 
 **Live demo:** https://sc4052-cloud-project-citesight.onrender.com
 
@@ -18,39 +20,51 @@ CiteSight fixes this by **retrieving real papers first**, then generating answer
 
 ---
 
-## Live API — Try It Now
+## ✨ Web Interface Features
 
-Open these URLs directly in your browser (replace the base URL with your own Render URL if self-hosting):
+CiteSight now includes a modern, user-friendly web interface alongside its API:
+
+- **🏠 Home Page:** Professional dashboard with search functionality and quick action buttons
+- **🔍 Smart Search:** Ask research questions directly through an intuitive search box
+- **📚 Paper Management:** Browse all papers with organized metadata and abstracts
+- **📥 Intelligent Fetching:** Fetch new papers from arXiv with duplicate detection and status indicators
+- **❤️ Health Monitoring:** Real-time system status and knowledge base statistics
+- **📱 Responsive Design:** Works seamlessly on desktop and mobile devices
+
+The web interface makes CiteSight accessible to non-technical users while maintaining full API compatibility for developers.
+
+---
+
+## Web Interface — Try It Now
+
+CiteSight now features a beautiful web interface! Open these URLs directly in your browser (replace the base URL with your own Render URL if self-hosting):
 
 | What you want to do | URL |
 |---|---|
-| Welcome + route list | `https://citesight.onrender.com/` |
-| Ask a research question | `https://citesight.onrender.com/query?q=how+do+transformers+work` |
-| Ask with more results | `https://citesight.onrender.com/query?q=hallucination+in+llms&k=5` |
-| Fetch real papers from arXiv | `https://citesight.onrender.com/fetch?topic=large+language+models` |
-| See all papers in knowledge base | `https://citesight.onrender.com/papers` |
-| Health check | `https://citesight.onrender.com/health` |
+| **Home Page** - Search questions, quick actions | `https://sc4052-cloud-project-citesight.onrender.com/` |
+| Ask a research question | `https://sc4052-cloud-project-citesight.onrender.com/query?q=how+do+transformers+work` |
+| Ask with more results | `https://sc4052-cloud-project-citesight.onrender.com/query?q=hallucination+in+llms&k=5` |
+| Fetch real papers from arXiv | `https://sc4052-cloud-project-citesight.onrender.com/fetch?topic=large+language+models` |
+| See all papers in knowledge base | `https://sc4052-cloud-project-citesight.onrender.com/papers` |
+| Health check | `https://sc4052-cloud-project-citesight.onrender.com/health` |
 
-### Example response from `/query`
+### What You'll See
+
+- **Home Page:** Professional interface with search box, quick action buttons, and knowledge base stats
+- **Query Results:** Formatted answers with collapsible citations, relevance scores, and confidence indicators
+- **Papers List:** Organized display of all papers with abstracts and metadata
+- **Fetch Results:** Shows fetched papers with "Newly added" or "Already included" status badges
+- **Health Dashboard:** System status and knowledge base statistics
+
+### API Endpoints Still Available
+
+The original JSON API endpoints are still functional for programmatic access:
 
 ```json
-{
-  "query": "what causes hallucination in language models",
-  "retrieved_count": 3,
-  "confidence": "high",
-  "top_relevance": 0.529,
-  "answer": "Based on the retrieved literature...\n\n[P005] Large language models exhibit a tendency to hallucinate — generating content that is factually incorrect...",
-  "citations": [
-    {
-      "id": "P005",
-      "title": "Hallucination in Large Language Models: A Survey",
-      "authors": "Ji et al.",
-      "year": 2023,
-      "venue": "ACM Computing Surveys",
-      "relevance_score": 0.529
-    }
-  ]
-}
+GET /query?q=your+question
+GET /papers
+GET /fetch?topic=topic+name
+GET /health
 ```
 
 ---
@@ -81,7 +95,13 @@ The key architectural guarantee: the LLM only sees retrieved papers. It **cannot
 
 ```
 citesight/
-├── app.py              # Full Flask application — retrieval engine + API
+├── app.py              # Full Flask application — retrieval engine + web interface
+├── templates/          # HTML templates for web interface
+│   ├── index.html      # Home page with search and quick actions
+│   ├── query.html      # Query results with citations
+│   ├── papers.html     # Papers list display
+│   ├── fetch.html      # Fetch results with status indicators
+│   └── health.html     # Health dashboard
 ├── requirements.txt    # Python dependencies (flask, requests, gunicorn)
 ├── render.yaml         # Render.com deployment config
 ├── Procfile            # Gunicorn startup instruction
@@ -94,7 +114,7 @@ citesight/
 
 **Step 1 — Install dependencies**
 ```bash
-pip install flask requests
+pip install -r requirements.txt
 ```
 
 **Step 2 — Start the server**
@@ -102,12 +122,14 @@ pip install flask requests
 python app.py
 ```
 
-**Step 3 — Open your browser**
+**Step 3 — Open your browser to the web interface**
 ```
-http://localhost:5000/
-http://localhost:5000/query?q=transformer+attention
-http://localhost:5000/fetch?topic=large+language+models
+http://localhost:5000/                    # Home page with search interface
+http://localhost:5000/query?q=transformer+attention  # Direct query
+http://localhost:5000/fetch?topic=large+language+models  # Fetch papers
 ```
+
+The web interface provides an intuitive way to interact with CiteSight without needing to construct URLs manually. Use the search box on the home page or the quick action buttons for the best experience!
 
 ---
 
@@ -142,10 +164,12 @@ CiteSight ships with 8 foundational AI/NLP papers pre-loaded:
 | P007 | Chain-of-Thought Prompting Elicits Reasoning in LLMs | Wei et al. | 2022 |
 | P008 | Constitutional AI: Harmlessness from AI Feedback | Bai et al. | 2022 |
 
-To expand the knowledge base with real papers from arXiv on any topic, call:
+To expand the knowledge base with real papers from arXiv on any topic, use the web interface or call:
 ```
 /fetch?topic=your+topic+here
 ```
+
+The web interface provides visual feedback showing which papers are newly added vs. already included in your knowledge base.
 
 ---
 

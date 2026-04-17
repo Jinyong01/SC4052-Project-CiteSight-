@@ -407,16 +407,18 @@ def fetch_papers():
     if not topic:
         return render_template('fetch.html', error="Please provide a topic. Example: /fetch?topic=transformer+attention"), 400
 
+    # Get existing titles before fetching (since fetch_from_arxiv modifies PAPERS)
+    existing_titles_before = {p["title"] for p in PAPERS}
+
     fetched = fetch_from_arxiv(topic, max_results=n)
 
     if isinstance(fetched, dict) and "error" in fetched:
         return render_template('fetch.html', error=fetched["error"]), 503
 
-    # Check which papers are new vs already existing
-    existing_titles = {p["title"] for p in PAPERS}
+    # Check which papers are new vs already existing (using titles from before fetch)
     papers_with_status = []
     for paper in fetched:
-        status = "Already included" if paper["title"] in existing_titles else "Newly added"
+        status = "Already included" if paper["title"] in existing_titles_before else "Newly added"
         papers_with_status.append({**paper, "status": status})
 
     # If no papers were fetched (all duplicates), show a message
