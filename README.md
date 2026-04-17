@@ -4,7 +4,7 @@
 > A SaaS platform for citation-accurate scientific search, built on Retrieval-Augmented Generation (RAG).
 > Every factual claim in CiteSight's answers is directly traceable to a real retrieved paper — hallucinated citations are architecturally impossible.
 
-**Live demo:** https://citesight.onrender.com
+**Live demo:** https://sc4052-cloud-project-citesight.onrender.com
 
 > ⚠️ **First request may take ~30 seconds** — the free hosting tier sleeps after 15 minutes of inactivity. Just wait for it to wake up, then it responds instantly.
 

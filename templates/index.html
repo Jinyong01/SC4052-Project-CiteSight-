@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CiteSight - Generative Information Retrieval for Science</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .search-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .quick-actions {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .action-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .action-item {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .action-item h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .stats {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .routes {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .route {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+        }
+        .examples {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .example-link {
+            display: block;
+            margin: 5px 0;
+            color: #3498db;
+            text-decoration: none;
+        }
+        .example-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 CiteSight</h1>
+        <p>Generative Information Retrieval for Science</p>
+        <p>Every factual claim is traceable to real papers — no hallucinations!</p>
+    </div>
+    
+    <div class="search-form">
+        <h2>Ask a Research Question</h2>
+        <form action="/query" method="get">
+            <input type="text" name="q" placeholder="e.g., How do transformers work?" required>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+        
+        <div class="quick-actions">
+            <h2>Quick Actions</h2>
+            <div class="action-group">
+                <div class="action-item">
+                    <h3>📥 Fetch New Papers</h3>
+                    <form action="/fetch" method="get" style="display: inline;">
+                        <input type="text" name="topic" placeholder="e.g., neural networks" required style="width: 200px; margin-right: 10px;">
+                        <button type="submit">Fetch</button>
+                    </form>
+                </div>
+                <div class="action-item">
+                    <h3>📚 View All Papers</h3>
+                    <a href="/papers"><button type="button">Browse Papers</button></a>
+                </div>
+                <div class="action-item">
+                    <h3>❤️ Check Health</h3>
+                    <a href="/health"><button type="button">Health Status</button></a>
+                </div>
+            </div>
+        </div>
+    <div class="examples">
+        <h3>Example Queries</h3>
+        <a href="/query?q=how+do+transformers+work" class="example-link">How do transformers work?</a>
+        <a href="/query?q=what+causes+hallucination+in+llms" class="example-link">What causes hallucination in LLMs?</a>
+        <a href="/query?q=chain+of+thought+reasoning" class="example-link">Chain of thought reasoning</a>
+        <a href="/query?q=scaling+laws+for+neural+models" class="example-link">Scaling laws for neural models</a>
+    </div>
+    
+    <div class="routes">
+        <h3>API Endpoints</h3>
+        <div class="route">
+            <strong>GET /query?q=your+question</strong><br>
+            Ask a research question → get grounded answer with citations
+        </div>
+        <div class="route">
+            <strong>GET /query?q=...&k=5</strong><br>
+            Same, but retrieve top 5 papers instead of default 3
+        </div>
+        <div class="route">
+            <strong>GET /papers</strong><br>
+            List all papers in the knowledge base
+        </div>
+        <div class="route">
+            <strong>GET /fetch?topic=neural+networks</strong><br>
+            Pull fresh papers from arXiv and add to knowledge base
+        </div>
+        <div class="route">
+            <strong>GET /health</strong><br>
+            Check server status
+        </div>
+    </div>
+</body>
+</html>

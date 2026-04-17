@@ -4,8 +4,9 @@ import json
 import time
 import urllib.request
 import urllib.parse
+import requests
 from collections import Counter, defaultdict
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
@@ -133,17 +134,17 @@ def fetch_from_arxiv(topic: str, max_results: int = 5) -> list:
             # arXiv policy: Wait 3 seconds between requests
             time.sleep(3) 
             
-            req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=15) as response:
-                xml_data = response.read().decode("utf-8")
-                break # Success! Exit the retry loop
-        except urllib.error.HTTPError as e:
-            if e.code == 429:
+            response = requests.get(url, headers=headers, timeout=15)
+            response.raise_for_status()  # Raise an exception for bad status codes
+            xml_data = response.text
+            break # Success! Exit the retry loop
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
                 print(f"[arXiv] Rate limited (429). Waiting longer... (Attempt {attempt+1})")
                 time.sleep(5) # Extra wait on 429
                 continue
-            return {"error": f"arXiv HTTP Error {e.code}: {e.reason}"}
-        except Exception as e:
+            return {"error": f"arXiv HTTP Error {e.response.status_code}: {e.response.reason}"}
+        except requests.exceptions.RequestException as e:
             return {"error": f"Could not reach arXiv: {str(e)}"}
 
     if not xml_data:
@@ -336,20 +337,8 @@ def generate_answer(query: str, retrieved: list) -> dict:
 
 @app.route("/")
 def home():
-    """Welcome page — shows available routes."""
-    return jsonify({
-        "service": "CiteSight — Generative Information Retrieval for Science",
-        "status":  "running",
-        "papers_in_knowledge_base": len(PAPERS),
-        "routes": {
-            "GET /query?q=your+question":     "Ask a research question → get grounded answer with citations",
-            "GET /query?q=...&k=5":           "Same, but retrieve top 5 papers instead of default 3",
-            "GET /papers":                    "List all papers in the knowledge base",
-            "GET /fetch?topic=neural+networks": "Pull fresh papers from arXiv and add to knowledge base",
-            "GET /health":                    "Check server status",
-        },
-        "example": "http://localhost:5000/query?q=how+do+transformers+work",
-    })
+    """Welcome page — shows available routes and provides a simple web interface."""
+    return render_template('index.html', papers_count=len(PAPERS))
 
 
 @app.route("/query")
@@ -371,19 +360,19 @@ def query():
     k = int(request.args.get("k", 3))
 
     if not q:
-        return jsonify({"error": "Please provide a query. Example: /query?q=transformer+attention"}), 400
+        return render_template('query.html', error="Please provide a query. Example: /query?q=transformer+attention"), 400
 
     retrieved = retrieve(q, top_k=k)
     result    = generate_answer(q, retrieved)
 
-    return jsonify({
-        "query":             q,
-        "retrieved_count":   len(retrieved),
-        "confidence":        result["confidence"],
-        "top_relevance":     result.get("top_score", 0),
-        "answer":            result["answer"],
-        "citations":         result["citations"],
-    })
+    return render_template('query.html',
+        query=q,
+        retrieved_count=len(retrieved),
+        confidence=result["confidence"],
+        top_relevance=result.get("top_score", 0),
+        answer=result["answer"],
+        citations=result["citations"]
+    )
 
 
 @app.route("/papers")
@@ -394,20 +383,7 @@ def list_papers():
     Usage:
         http://localhost:5000/papers
     """
-    papers_summary = [
-        {
-            "id":      p["id"],
-            "title":   p["title"],
-            "authors": p["authors"],
-            "year":    p["year"],
-            "venue":   p["venue"],
-        }
-        for p in PAPERS
-    ]
-    return jsonify({
-        "total":  len(PAPERS),
-        "papers": papers_summary,
-    })
+    return render_template('papers.html', papers=PAPERS)
 
 
 @app.route("/fetch")
@@ -429,30 +405,36 @@ def fetch_papers():
     n     = int(request.args.get("n", 5))
 
     if not topic:
-        return jsonify({"error": "Please provide a topic. Example: /fetch?topic=transformer+attention"}), 400
+        return render_template('fetch.html', error="Please provide a topic. Example: /fetch?topic=transformer+attention"), 400
 
     fetched = fetch_from_arxiv(topic, max_results=n)
 
     if isinstance(fetched, dict) and "error" in fetched:
-        return jsonify(fetched), 503
+        return render_template('fetch.html', error=fetched["error"]), 503
 
-    return jsonify({
-        "message":           f"Successfully fetched {len(fetched)} papers from arXiv.",
-        "topic":             topic,
-        "papers_added":      len(fetched),
-        "total_in_kb":       len(PAPERS),
-        "new_papers":        [{"id": p["id"], "title": p["title"], "year": p["year"]} for p in fetched],
-    })
+    # Check which papers are new vs already existing
+    existing_titles = {p["title"] for p in PAPERS}
+    papers_with_status = []
+    for paper in fetched:
+        status = "Already included" if paper["title"] in existing_titles else "Newly added"
+        papers_with_status.append({**paper, "status": status})
+
+    # If no papers were fetched (all duplicates), show a message
+    if not papers_with_status:
+        return render_template('fetch.html', topic=topic, message="All papers for this topic are already in the knowledge base.")
+
+    return render_template('fetch.html', topic=topic, papers=papers_with_status)
 
 
 @app.route("/health")
 def health():
     """Quick health check."""
-    return jsonify({
-        "status":                "ok",
-        "indexed_papers":        len(PAPERS),
-        "service":               "CiteSight",
-    })
+    import time
+    return render_template('health.html',
+        status="OK ✅",
+        papers_count=len(PAPERS),
+        timestamp=time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
+    )
 
 
 # Run the Flask app. In production, use a WSGI server like Gunicorn instead of app.run().

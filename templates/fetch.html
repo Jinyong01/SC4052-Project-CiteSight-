@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Papers - CiteSight</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .back-link {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .fetch-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .paper {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .paper h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .paper-meta {
+            color: #666;
+            font-size: 14px;
+        }
+        .error {
+            color: red;
+            background-color: #ffeaea;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ffcccc;
+        }
+        .info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #bee5eb;
+        }
+        .status {
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status.newly-added {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status.already-included {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📥 CiteSight - Fetch New Papers</h1>
+        <a href="/" class="back-link">← Back to Home</a>
+    </div>
+    
+    <div class="fetch-form">
+        <h2>Fetch Papers from arXiv</h2>
+        <form action="/fetch" method="get">
+            <input type="text" name="topic" placeholder="e.g., neural networks" required>
+            <button type="submit">Fetch Papers</button>
+        </form>
+        <p>Enter a topic to search for recent papers on arXiv. Up to 5 papers will be fetched and added to the knowledge base.</p>
+    </div>
+    
+    {% if error %}
+    <div class="results">
+        <div class="error">
+            <strong>Error:</strong> {{ error }}
+        </div>
+    </div>
+    {% elif message %}
+    <div class="results">
+        <div class="info">
+            <strong>Info:</strong> {{ message }}
+        </div>
+    </div>
+    {% elif papers %}
+    <div class="results">
+        <h3>Fetched Papers for "{{ topic }}" ({{ papers|length }})</h3>
+        {% for paper in papers %}
+        <div class="paper">
+            <h4>{{ paper.title }} <span class="status {{ paper.status|lower|replace(' ', '-') }}">{{ paper.status }}</span></h4>
+            <div class="paper-meta">
+                <strong>Authors:</strong> {{ paper.authors }} | 
+                <strong>Year:</strong> {{ paper.year }} | 
+                <strong>Venue:</strong> {{ paper.venue }}
+            </div>
+            <p><strong>Abstract:</strong> {{ paper.abstract }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</body>
+</html>

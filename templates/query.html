@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Results - CiteSight</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .back-link {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .query-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .answer-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .citations-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .citation {
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-bottom: 15px;
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .confidence {
+            color: {% if confidence == 'high' %}green{% elif confidence == 'medium' %}orange{% else %}red{% endif %};
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            background-color: #ffeaea;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ffcccc;
+            margin-bottom: 20px;
+        }
+        pre {
+            white-space: pre-wrap;
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 CiteSight - Query Results</h1>
+        <a href="/" class="back-link">← Back to Home</a>
+    </div>
+    
+    <div class="query-section">
+        {% if error %}
+        <div class="error">
+            <h2>Error</h2>
+            <p>{{ error }}</p>
+        </div>
+        {% else %}
+        <h2>Your Query</h2>
+        <p><strong>{{ query }}</strong></p>
+        <div class="stats">
+            <p><strong>Retrieved papers:</strong> {{ retrieved_count }}</p>
+            <p><strong>Confidence:</strong> <span class="confidence">{{ confidence }}</span></p>
+            <p><strong>Top relevance score:</strong> {{ "%.3f"|format(top_relevance) }}</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if not error %}
+    <div class="answer-section">
+        <h2>Answer</h2>
+        <pre>{{ answer }}</pre>
+    </div>
+    
+    <div class="citations-section">
+        <h2>Citations</h2>
+        {% for citation in citations %}
+        <div class="citation">
+            <h3>[{{ citation.id }}] {{ citation.title }}</h3>
+            <p><strong>Authors:</strong> {{ citation.authors }}</p>
+            <p><strong>Year:</strong> {{ citation.year }} | <strong>Venue:</strong> {{ citation.venue }}</p>
+            <p><strong>Relevance Score:</strong> {{ "%.3f"|format(citation.relevance_score) }}</p>
+            <details>
+                <summary>Abstract</summary>
+                <p>{{ citation.abstract }}</p>
+            </details>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</body>
+</html>
